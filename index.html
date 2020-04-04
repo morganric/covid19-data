@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+    <title>Covid 19 Data & Decisions</title>
+
+    <!-- Required Stylesheets -->
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css"
+    />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css"
+    />
+
+    <!-- Load polyfills to support older browsers -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver"></script>
+
+    <!-- Required scripts -->
+    <script src="https://unpkg.com/vue@latest/dist/vue.js"></script>
+    <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.js" integrity="sha256-bd8XIKzrtyJ1O5Sh3Xp3GiuMIzWC42ZekvrMMD4GxRg=" crossorigin="anonymous"></script>
+
+
+    <style type="text/css">
+    	/*Column Highlighting*/
+		table {
+		    overflow: hidden;
+		}
+
+		td, th {
+		    position: relative;
+		}
+		td:hover::after,
+		th:hover::after {
+		    content: "";
+		    position: absolute;
+		    background-color: rgba(0,0,0,0.075);
+		    left: 0;
+		    top: -5000px;
+		    height: 10000px;
+		    width: 100%;
+		    z-index: -1;
+		}
+    </style>
+
+  </head>
+  <body>
+    <!-- Our application root element -->
+    <div id="app">
+      <b-container>
+      	<br/>
+        <h1>Covid 19 Data & Decisions</h1>
+        <hr/>
+        <div>
+		    <b-table  hover :items="items"></b-table>
+		</div>
+
+      </b-container>
+    </div>
+
+    <!-- Start running your app -->
+    <script>
+      	Vue.use(BootstrapVue)
+		Vue.config.productionTip = false
+
+		var app = new Vue({
+		  el: '#app',
+		  data: {
+		    message: 'Hello Vue!',
+		    source: {},
+		    countries: [
+			    {
+			    	name: "United Kingdom",
+			    	full: null,
+			    	ground_zero: 55 //43 // 56
+			    },
+			    {
+			    	name: "France",
+			    	full: null,
+			    	ground_zero: 50// // 54
+			    },
+			    {
+			    	name: "Spain",
+			    	full: null,
+			    	ground_zero: 50// // 50
+			    },
+			    {
+			    	name: "Italy",
+			    	full: null,
+			    	ground_zero: 40 // 30 // 41
+			    },
+		    ],
+		   	items: []
+		  },
+
+		  created: function() {
+		  	var that = this;
+
+		  	var alldata = {};
+		  	axios.get("https://pomber.github.io/covid19/timeseries.json")
+			  .then(function (response) {
+			    // handle success
+			    that.source = response.data;
+			    // console.log(response);
+			  })
+			  .catch(function (error) {
+			    // handle error
+			    console.log(error);
+			  })
+			  .then(function () {
+			    // always executed
+
+	    	  	console.log("source", that.source);
+			  	
+			  	// that.countries[0].full = that.source["United Kingdom"];
+	    	//   	that.countries[1].full = that.source["France"];
+	    	//   	that.countries[2].full = that.source["Spain"];
+	    	//   	that.countries[3].full = that.source["Italy"];
+
+
+	    	  	that.countries[0].full = that.source["United Kingdom"].slice(that.countries[0].ground_zero, that.source["United Kingdom"].length);
+	    	  	
+	    	  	that.countries[1].full = that.source["France"].slice(that.countries[1].ground_zero, that.source["France"].length);
+
+	    	  	that.countries[2].full = that.source["Spain"].slice(that.countries[2].ground_zero, that.source["Spain"].length);
+
+	    	  	that.countries[3].full = that.source["Italy"].slice(that.countries[3].ground_zero, that.source["Italy"].length);
+
+	    	  	console.log("countries", that.countries);
+
+
+	    	  	var uk = that.countries[0];
+		  		var france = that.countries[1];
+			  	var spain = that.countries[2];
+			  	var italy = that.countries[3];
+
+			  	for (let i = 0; i < 34; i++) {
+				  // Runs 5 times, with values of step 0 through 4.
+				  // console.log('Walking east one step');
+
+				  var row = {
+				  	// day: i,
+				  	'Italy Date': italy.full[i] ? italy.full[i].date : "",
+				  	'Italy': italy.full[i] ? italy.full[i].deaths : "",
+				  	'UK Date': uk.full[i] ? uk.full[i].date : "",
+				  	'UK': uk.full[i] ? uk.full[i].deaths : "",
+				  	'Spain Date': spain.full[i] ? spain.full[i].date : "",
+				  	'Spain': spain.full[i] ? spain.full[i].deaths : "",
+				  	'France Date': france.full[i] ? france.full[i].date : "",
+				  	'France': france.full[i] ? france.full[i].deaths : "",
+
+				  	
+				  }
+
+				  if(uk.full[i] && uk.full[i].date === "2020-3-23") {
+				  	row["_cellVariants"] = {"UK": 'info'};
+				  }
+
+				  if(italy.full[i] && italy.full[i].date === "2020-3-9") {
+				  	row["_cellVariants"] = {"Italy": 'info'};
+				  }
+
+				  if(spain.full[i] && spain.full[i].date === "2020-3-14") {
+				  	row["_cellVariants"] = {"Spain": 'info'};
+				  }
+
+				  if(france.full[i] && france.full[i].date === "2020-3-17") {
+				  	row["_cellVariants"] = {"France": 'info'};
+				  }
+
+				  that.items.push(row);
+
+				}
+
+				console.log(that.items);
+
+			  });
+
+		  },
+
+		  mounted: function() {
+		  	var that = this;
+		  	
+		  }
+
+		});	
+    </script>
+  </body>
+</html>
